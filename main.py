@@ -124,17 +124,17 @@ def train(tid, vid, data_path, tag=1):
             loss.backward()
             opt.step()
 
-            # best_acc = 0
-            # acc = accuracy_score(y_train, z.argmax(dim=-1))
+            best_acc = 0
+            acc = accuracy_score(y_train, z.argmax(dim=-1))
             if e % 20 == 0 and e != 0:
-                print('Epoch %d | Loss: %.4f' % (e, loss.item()))
+                print('Epoch %d | Loss: %.4f | Acc: %.4f' % (e, loss.item(), acc))
                 # save model
-                # if acc > best_acc:
-                #     best_acc = acc
-                    # if args.model == 'CNN':
-                    #     torch.save(model.state_dict(), './save_model/cnn_best_model.pth')
-                    # elif args.model == 'LSTM':  
-                    #     torch.save(model.state_dict(), './save_model/lstm_best_model.pth')
+                if acc > best_acc:
+                    best_acc = acc
+                    if args.model == 'CNN':
+                        torch.save(model.state_dict(), './save_model/cnn_best_model.pth')
+                    elif args.model == 'LSTM':  
+                        torch.save(model.state_dict(), './save_model/lstm_best_model.pth')
 
         model.eval()
         mat = model(x_val)
@@ -154,7 +154,13 @@ def train(tid, vid, data_path, tag=1):
 
 
 def predict(model_path, predict_data_path):
-    model = GNet() 
+    if args.model == 'CNN':
+        model = CNNNet()
+    elif args.model == 'LSTM':
+        model = LSTMNet()
+    elif args.model == 'GCN':    
+        model = GNet() 
+    
     model.load_state_dict(torch.load(model_path, weights_only=True))
     model.eval() 
 
@@ -167,12 +173,18 @@ def predict(model_path, predict_data_path):
         x_pred = pred_data[i:i+1, :args.d] 
         adj_pred = norm_adj(x_pred)
         x_pred = torch.from_numpy(x_pred).float()
+        if args.model == 'CNN' or args.model == 'LSTM':
+            x_pred = x_pred.unsqueeze(1)
+        
         if args.cuda:
             x_pred = x_pred.cuda()
             adj_pred = adj_pred.cuda()
 
         with torch.no_grad():
-            pred = model(adj_pred, x_pred)
+            if args.model == 'CNN' or args.model == 'LSTM':
+                pred = model(x_pred)
+            elif args.model == 'GCN':
+                pred = model(adj_pred, x_pred)
             prediction = pred.argmax().item()
             prediction_result.append(dict[prediction])
     print(prediction_result)
