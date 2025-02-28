@@ -123,11 +123,14 @@ def train(tid, vid, data_path, tag=1):
             opt.zero_grad()
             loss.backward()
             opt.step()
+
+            # best_acc = 0
+            # acc = accuracy_score(y_train, z.argmax(dim=-1))
             if e % 20 == 0 and e != 0:
-                print('Epoch %d | Loss: %.4f' % (e, loss.item(), acc))
+                print('Epoch %d | Loss: %.4f' % (e, loss.item()))
                 # save model
-                if acc > best_acc:
-                    best_acc = acc
+                # if acc > best_acc:
+                #     best_acc = acc
                     # if args.model == 'CNN':
                     #     torch.save(model.state_dict(), './save_model/cnn_best_model.pth')
                     # elif args.model == 'LSTM':  
@@ -155,6 +158,8 @@ def predict(model_path, predict_data_path):
     model.load_state_dict(torch.load(model_path, weights_only=True))
     model.eval() 
 
+    # dict
+    dict = {0:"低", 1:"中", 2:"高"}
     pred_data = pd.read_csv(predict_data_path, header=None).values
     print(f"pred_data.shape:{pred_data.shape}")
     prediction_result = []
@@ -169,6 +174,6 @@ def predict(model_path, predict_data_path):
         with torch.no_grad():
             pred = model(adj_pred, x_pred)
             prediction = pred.argmax().item()
-            prediction_result.append(prediction)
+            prediction_result.append(dict[prediction])
     print(prediction_result)
 

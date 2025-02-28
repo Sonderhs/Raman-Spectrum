@@ -23,7 +23,7 @@ parser.add_argument('--hidden', type=int, default=64,
                     help='Dimension of representations')
 parser.add_argument('--c', type=int, default=3,
                     help='Num of classes')
-parser.add_argument('--d', type=int, default=1200,
+parser.add_argument('--d', type=int, default=3074,
                     help='Num of spectra dimension')
 parser.add_argument('--model', type=str, default='GCN',
                     help='Model')  # GCN, CNN, LSTM
