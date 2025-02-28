@@ -57,6 +57,8 @@ def train(tid, vid, data_path, tag=1):
     if args.model == 'GCN':
         model = GNet()
         x_train, x_val, y_train, y_val, adj_train, adj_val = data_loader(tid, vid, data_path)
+        print(f"x_train.shape:{x_train.shape}")
+        print(f"adj_train.shape:{adj_train.shape}")
         opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.wd)
         loss_f = F.cross_entropy
 
@@ -126,11 +128,10 @@ def train(tid, vid, data_path, tag=1):
                 # save model
                 if acc > best_acc:
                     best_acc = acc
-                    if args.model == 'CNN':
-                        torch.save(model.state_dict(), './save_model/cnn_best_model.pth')
-                    elif args.model == 'LSTM':  
-                        torch.save(model.state_dict(), './save_model/lstm_best_model.pth')
-
+                    # if args.model == 'CNN':
+                    #     torch.save(model.state_dict(), './save_model/cnn_best_model.pth')
+                    # elif args.model == 'LSTM':  
+                    #     torch.save(model.state_dict(), './save_model/lstm_best_model.pth')
 
         model.eval()
         mat = model(x_val)
@@ -155,19 +156,19 @@ def predict(model_path, predict_data_path):
     model.eval() 
 
     pred_data = pd.read_csv(predict_data_path, header=None).values
-    x_pred = pred_data[0, :args.d].reshape(1, -1)
+    print(f"pred_data.shape:{pred_data.shape}")
+    prediction_result = []
+    for i in range(pred_data.shape[0]):
+        x_pred = pred_data[i:i+1, :args.d] 
+        adj_pred = norm_adj(x_pred)
+        x_pred = torch.from_numpy(x_pred).float()
+        if args.cuda:
+            x_pred = x_pred.cuda()
+            adj_pred = adj_pred.cuda()
 
-    adj_pred = norm_adj(x_pred)
-    x_pred = torch.from_numpy(x_pred).float()
-    if args.cuda:
-        x_pred = x_pred.cuda()
-        adj_pred = adj_pred.cuda()
-
-    with torch.no_grad():
-        pred = model(adj_pred, x_pred)
-        print(f"pred:{pred}")
-        prediction = pred.argmax().item()
-        print(f"prediction：{prediction}")
-
-
+        with torch.no_grad():
+            pred = model(adj_pred, x_pred)
+            prediction = pred.argmax().item()
+            prediction_result.append(prediction)
+    print(prediction_result)
 

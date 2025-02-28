@@ -8,6 +8,6 @@ if __name__ == '__main__':
         KFold_CV(data_path)
         
     elif args.task == 'predict':
-        predict_data_path = "./data/pred.csv"
+        predict_data_path = "./data/new.csv"
         predict(model_path, predict_data_path)
         
