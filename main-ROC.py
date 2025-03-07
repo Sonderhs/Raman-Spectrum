@@ -9,6 +9,10 @@ from sklearn.model_selection import KFold
 from utils import *
 from config import args
 from layer import *
+from sklearn.metrics import confusion_matrix, classification_report
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc  
 
 
 # KFold Cross Validation
@@ -96,6 +100,55 @@ def train(tid, vid, data_path, tag=1):
                     f1_score(y_val, pred.argmax(dim=-1), average="weighted"),
                 ]
 
+        # 计算并打印混淆矩阵
+        y_pred = pred.argmax(dim=-1).numpy()
+        cm = confusion_matrix(y_val, y_pred)
+        print(f"Confusion Matrix for Fold {tag}:")
+        print(cm)
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+        plt.title(f"Confusion Matrix for Fold {tag}")
+        plt.xlabel("Predicted Label")
+        plt.ylabel("True Label")
+        plt.show()
+        
+
+        # 预测测试集的概率  
+        y_scores = pred[:, 1].detach().numpy().flatten()
+        # 计算ROC曲线的点  
+        fpr, tpr, thresholds = roc_curve(y_val, y_scores)
+        # 计算AUC值  
+        roc_auc = auc(fpr, tpr)
+        # 绘制ROC曲线  
+        plt.figure()
+        plt.plot(fpr, tpr, color='#800000', lw=2, label='ROC curve (area = %0.2f)' % roc_auc) # 将曲线颜色改为酒红色
+        plt.plot([0, 1], [0, 1], color='black', lw=2, linestyle='--') # 虚线颜色保持不变
+
+        # 设置坐标轴标签和图例的字体和大小
+        plt.xlabel('False Positive Rate', fontsize=15, fontname='Arial')
+        plt.ylabel('True Positive Rate', fontsize=15, fontname='Arial')
+
+        # 设置图例字体
+        #font_prop = {'family': 'Arial', 'size': 18}
+        #plt.legend(prop=font_prop)
+
+        # 设置坐标轴的范围
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.0])
+
+        # 设置坐标轴刻度的字体和大小
+        plt.xticks(fontsize=15, fontname='Arial')
+        plt.yticks(fontsize=15, fontname='Arial')
+
+        # 显示图表
+        plt.show()
+        roc_data = pd.DataFrame({
+            'False Positive Rate': fpr,
+            'True Positive Rate': tpr,
+            'Thresholds': thresholds
+        })
+
+        # 保存到CSV文件
+        roc_data.to_csv('roc_curve_XGBoost_magainin2.csv', index=False)
         return res
 
 
