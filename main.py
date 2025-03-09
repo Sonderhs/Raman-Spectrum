@@ -9,6 +9,10 @@ from sklearn.model_selection import KFold
 from utils import *
 from config import args
 from layer import *
+from sklearn.metrics import confusion_matrix, classification_report
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc  
 
 
 # KFold Cross Validation
@@ -57,8 +61,6 @@ def train(tid, vid, data_path, tag=1):
     if args.model == 'GCN':
         model = GNet()
         x_train, x_val, y_train, y_val, adj_train, adj_val = data_loader(tid, vid, data_path)
-        print(f"x_train.shape:{x_train.shape}")
-        print(f"adj_train.shape:{adj_train.shape}")
         opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.wd)
         loss_f = F.cross_entropy
 
@@ -87,14 +89,20 @@ def train(tid, vid, data_path, tag=1):
                 pred = pred.cuda()
             if args.c == 2:
                 predict = pred[:, 1].detach().numpy().flatten()
-                res = binary(y_val, predict)
+                plot_confusion_matrix(y_val, pred.argmax(dim=-1), tag)
+                plot_roc_curve(y_val, pred)
+                res = binary(y_val, predict, tag)             
             else:
+                predict = pred.argmax(dim=-1)
+                plot_ovr_roc_curve(y_val, pred)
+                plot_confusion_matrix(y_val, predict, tag)
                 res = [
                     recall_score(y_val, pred.argmax(dim=-1), average="weighted"),
                     precision_score(y_val, pred.argmax(dim=-1), average="weighted"),
                     accuracy_score(y_val, pred.argmax(dim=-1)),
                     f1_score(y_val, pred.argmax(dim=-1), average="weighted"),
                 ]
+
 
         return res
 
@@ -147,9 +155,13 @@ def train(tid, vid, data_path, tag=1):
                 pred = pred.cuda()
             if args.c == 2:
                 predict = pred[:, 1].detach().numpy().flatten()
-                res = binary(y_val, predict)
+                plot_confusion_matrix(y_val, pred.argmax(dim=-1), tag)
+                plot_roc_curve(y_val, pred)
+                res = binary(y_val, predict, tag)
             else:
                 predict = pred.argmax(dim=-1)
+                plot_ovr_roc_curve(y_val, pred)
+                plot_confusion_matrix(y_val, predict, tag)
                 res = [
                     recall_score(y_val, predict, average="weighted"),
                     precision_score(y_val, predict, average="weighted"),

@@ -21,7 +21,7 @@ parser.add_argument('--wd', type=float, default=1e-4,
                     help='Weight decay (L2 loss on parameters).')  # L2正则化
 parser.add_argument('--hidden', type=int, default=64,
                     help='Dimension of representations')
-parser.add_argument('--c', type=int, default=2,
+parser.add_argument('--c', type=int, default=3,
                     help='Num of classes')
 parser.add_argument('--d', type=int, default=1200,
                     help='Num of spectra dimension')
