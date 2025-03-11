@@ -34,13 +34,10 @@ def plot_confusion_matrix(yv, pred, tag):
     plt.ylabel("True Label")
     plt.show()
 
-def plot_roc_curve(y_val, pred):
+def plot_roc_curve(y_val, pred, tag):
     # 预测测试集的概率  
     y_scores = pred[:, 1].detach().numpy().flatten()
-    print(f"y_scores: {y_scores}")
     # 计算ROC曲线的点  
-    print(f"y_val: {y_val}")
-    print(f"y_scores: {y_scores}")
     fpr, tpr, thresholds = roc_curve(y_val, y_scores)
     # 计算AUC值  
     roc_auc = auc(fpr, tpr)
@@ -65,7 +62,7 @@ def plot_roc_curve(y_val, pred):
         'Thresholds': thresholds
     })
     # 保存到CSV文件
-    roc_data.to_csv('roc_curve_XGBoost_magainin2.csv', index=False)
+    roc_data.to_csv(f'./roc_curve/roc_curve_{tag}.csv', index=False)
 
 def plot_ovr_roc_curve(y_val, pred):
     n_classes = pred.shape[1]  # 获取类别数量

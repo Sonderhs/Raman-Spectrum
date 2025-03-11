@@ -90,7 +90,7 @@ def train(tid, vid, data_path, tag=1):
             if args.c == 2:
                 predict = pred[:, 1].detach().numpy().flatten()
                 plot_confusion_matrix(y_val, pred.argmax(dim=-1), tag)
-                plot_roc_curve(y_val, pred)
+                plot_roc_curve(y_val, pred, tag)
                 res = binary(y_val, predict, tag)             
             else:
                 predict = pred.argmax(dim=-1)
@@ -156,7 +156,7 @@ def train(tid, vid, data_path, tag=1):
             if args.c == 2:
                 predict = pred[:, 1].detach().numpy().flatten()
                 plot_confusion_matrix(y_val, pred.argmax(dim=-1), tag)
-                plot_roc_curve(y_val, pred)
+                plot_roc_curve(y_val, pred, tag)
                 res = binary(y_val, predict, tag)
             else:
                 predict = pred.argmax(dim=-1)
