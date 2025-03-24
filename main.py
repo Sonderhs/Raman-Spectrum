@@ -61,6 +61,8 @@ def train(tid, vid, data_path, tag=1):
     if args.model == 'GCN':
         model = GNet()
         x_train, x_val, y_train, y_val, adj_train, adj_val = data_loader(tid, vid, data_path)
+        print(f"adj_train shape: {adj_train.shape}")
+        print(f"x_train shape: {x_train.shape}")
         opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.wd)
         loss_f = F.cross_entropy
 
@@ -94,7 +96,7 @@ def train(tid, vid, data_path, tag=1):
                 res = binary(y_val, predict, tag)             
             else:
                 predict = pred.argmax(dim=-1)
-                plot_ovr_roc_curve(y_val, pred)
+                plot_ovr_roc_curve(y_val, pred, tag)
                 plot_confusion_matrix(y_val, predict, tag)
                 res = [
                     recall_score(y_val, pred.argmax(dim=-1), average="weighted"),
@@ -160,7 +162,7 @@ def train(tid, vid, data_path, tag=1):
                 res = binary(y_val, predict, tag)
             else:
                 predict = pred.argmax(dim=-1)
-                plot_ovr_roc_curve(y_val, pred)
+                plot_ovr_roc_curve(y_val, pred, tag)
                 plot_confusion_matrix(y_val, predict, tag)
                 res = [
                     recall_score(y_val, predict, average="weighted"),

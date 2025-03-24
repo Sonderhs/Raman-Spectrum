@@ -62,18 +62,35 @@ def plot_roc_curve(y_val, pred, tag):
         'Thresholds': thresholds
     })
     # 保存到CSV文件
-    roc_data.to_csv(f'./roc_curve/roc_curve_{tag}.csv', index=False)
+    roc_data.to_csv(f"./roc_curve/roc_curve_{tag}.csv", index=False)
 
-def plot_ovr_roc_curve(y_val, pred):
+def plot_ovr_roc_curve(y_val, pred, tag):
     n_classes = pred.shape[1]  # 获取类别数量
     y_val_bin = label_binarize(y_val, classes=np.arange(n_classes))
     fpr = dict()
     tpr = dict()
     roc_auc = dict()
 
+    # 用于保存所有类别的ROC数据
+    all_roc_data = []
+
     for i in range(n_classes):
         fpr[i], tpr[i], _ = roc_curve(y_val_bin[:, i], pred[:, i])
         roc_auc[i] = auc(fpr[i], tpr[i])
+        
+        # 将当前类别的ROC数据保存到DataFrame
+        roc_data = pd.DataFrame({
+            'False Positive Rate': fpr[i],
+            'True Positive Rate': tpr[i],
+            'Class': i,  # 添加类别标签
+        })
+        all_roc_data.append(roc_data)
+
+    # 合并所有类别的ROC数据
+    combined_roc_data = pd.concat(all_roc_data, ignore_index=True)
+    
+    # 保存到CSV文件，文件名包含Fold标签
+    combined_roc_data.to_csv(f'./ovr_roc_curve/roc_curve_ovr_{tag}.csv', index=False)
 
     # 绘制ROC曲线
     plt.figure()
